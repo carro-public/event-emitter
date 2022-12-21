@@ -43,6 +43,10 @@ class EloquentEventEmitter implements ShouldQueue
                 'class' => get_class($this->model),
                 'event' => $this->event,
             ]);
+        } else {
+            $this->log("Received Invalid Eloquent Event", [
+                'model' => json_encode($this->model, JSON_PRETTY_PRINT),
+            ]);
         }
     }
 

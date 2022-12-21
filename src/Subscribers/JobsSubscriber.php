@@ -4,6 +4,7 @@ namespace CarroPublic\EventEmitter\Subscribers;
 
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
+use CarroPublic\EventEmitter\Jobs\LaravelEventEmitter;
 use CarroPublic\EventEmitter\Jobs\EloquentEventEmitter;
 
 class JobsSubscriber
@@ -12,7 +13,8 @@ class JobsSubscriber
     {
         // If we are processing a SyncEvent Job, don't need to process the Emitter
         // This is to prevent echoing between two services
-        if ($event->job->payload()['displayName'] ?? '' === EloquentEventEmitter::class) {
+        $currentJob = $event->job->payload()['displayName'] ?? '';
+        if (in_array($currentJob, [EloquentEventEmitter::class, LaravelEventEmitter::class])) {
             EventSubscriber::$shouldSkipHandling = true;
         }
     }

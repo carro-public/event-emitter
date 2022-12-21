@@ -30,6 +30,10 @@ class LaravelEventEmitter implements ShouldQueue
                 'class' => get_class($this->event),
                 'event' => $this->event,
             ]);
+        } else {
+            $this->log("Received Invalid Laravel Event", [
+                'event' => json_encode($this->event, JSON_PRETTY_PRINT)
+            ]);
         }
     }
 
