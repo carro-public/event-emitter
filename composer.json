@@ -1,0 +1,19 @@
+{
+    "name": "carropublic/event-emitter",
+    "require": {
+        "php": ">=7.1.0",
+        "laravel/framework": ">=5.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "CarroPublic\\EventEmitter\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "CarroPublic\\EventEmitter\\ServiceProviders\\EventEmitterServiceProvider"
+            ]
+        }
+    }
+}
