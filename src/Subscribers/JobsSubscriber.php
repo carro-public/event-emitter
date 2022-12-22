@@ -33,6 +33,11 @@ class JobsSubscriber
      */
     public function subscribe($events)
     {
+        # If emitter should be disabled, do not register any listener
+        if (config('event-emitter.enable') === false) {
+            return;
+        }
+        
         $events->listen(JobProcessing::class, [self::class, 'onJobStarted']);
         $events->listen(JobProcessed::class, [self::class, 'onJobProcessed']);
     }

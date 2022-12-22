@@ -2,6 +2,12 @@
 
 return [
     /**
+     * Whether we should enable the event-emitter
+     * If false, the EventSubscriber will be disabled
+     */
+    'enable' => env('EVENT_EMITTER_ENABLE', true),
+    
+    /**
      * Whether to print out the event emitter logs
      */
     'logging' => env('EVENT_EMITTER_LOGGING_ENABLE', false),

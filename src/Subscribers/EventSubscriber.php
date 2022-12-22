@@ -17,18 +17,39 @@ class EventSubscriber
      */
     public function subscribe($events)
     {
+        # If emitter should be disabled, do not register any listener
+        if (config('event-emitter.enable') === false) {
+            return;
+        }
+        
         foreach (config('event-emitter.eloquents', []) as $eloquent => $eloquentEvents) {
-            foreach ($eloquentEvents as $event => $destinations) {
+            foreach ($eloquentEvents as $event => $config) {
                 $qualifiedEventName = "eloquent.{$event}: {$eloquent}";
-                $events->listen($qualifiedEventName, function ($model) use ($qualifiedEventName, $destinations) {
+                $events->listen($qualifiedEventName, function ($model) use ($qualifiedEventName, $config) {
                     # If we should not handle the listener, return immediately
                     # This flag will be turned on to prevent echoing
                     if (static::$shouldSkipHandling) {
                         return;
                     }
                     
+                    # If $config is one-dimension array, it is destinations array, with empty options
+                    # Otherwise, destinations and options will be defined explicitly
+                    if (isset($config['destinations'])) {
+                        $destinations = data_get($config['destinations'], []);
+                        $options = data_get($config['options'], []);
+                    } else {
+                        $destinations = $config;
+                        $options = [];
+                    }
+                    
                     foreach ($destinations as $destination) {
-                        EloquentEventEmitter::dispatch($model, $qualifiedEventName)->onConnection($destination);
+                        if (data_get($options, 'afterResponse', false)) {
+                            app()->terminating(function () use ($model, $qualifiedEventName, $options, $destination) {
+                                EloquentEventEmitter::dispatch($model, $qualifiedEventName, $options)->onConnection($destination);
+                            });
+                        } else {
+                            EloquentEventEmitter::dispatch($model, $qualifiedEventName, $options)->onConnection($destination);
+                        }
                     }
                 });
             }

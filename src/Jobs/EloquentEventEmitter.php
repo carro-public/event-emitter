@@ -11,20 +11,38 @@ use CarroPublic\EventEmitter\Jobs\Concerns\HasEmitterConcern;
 class EloquentEventEmitter implements ShouldQueue
 {
     use Dispatchable, Queueable, HasEmitterConcern;
-    
+
+    /**
+     * @var Model
+     */
     protected $model;
-    
+
+    /**
+     * The Qualified Eloquent Event
+     * @var string
+     */
     protected $event;
+
+    /**
+     * Determine whether the eloquent should be refreshed before emitting
+     * @var bool
+     */
+    protected bool $fresh = false;
 
     /**
      * NOTE: The construction of the Job will be created in Source Service
      * @param $model
      * @param $event
      */
-    public function __construct($model, $event)
+    public function __construct($model, $event, $options = [])
     {
         $this->model = $model;
         $this->event = $event;
+
+        # Set Job custom option
+        foreach ($options as $option => $value) {
+            $this->{$option} = $value;
+        }
     }
 
     /**
@@ -34,6 +52,11 @@ class EloquentEventEmitter implements ShouldQueue
     public function handle()
     {
         $this->model = $this->transformObject();
+        
+        # If the Eloquent should be refreshed before emitting
+        if ($this->fresh) {
+            $this->model->refresh();
+        }
 
         /** @var Model $model */
         if ($this->model) {
