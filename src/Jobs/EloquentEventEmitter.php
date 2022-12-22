@@ -55,7 +55,7 @@ class EloquentEventEmitter implements ShouldQueue
         
         # If the Eloquent should be refreshed before emitting
         if ($this->fresh) {
-            $this->model->refresh();
+            $this->model = $this->model->fresh();
         }
 
         /** @var Model $model */
