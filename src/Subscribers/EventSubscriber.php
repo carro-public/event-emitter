@@ -2,6 +2,7 @@
 
 namespace CarroPublic\EventEmitter\Subscribers;
 
+use Exception;
 use CarroPublic\EventEmitter\Jobs\LaravelEventEmitter;
 use CarroPublic\EventEmitter\Jobs\EloquentEventEmitter;
 
@@ -43,12 +44,23 @@ class EventSubscriber
                     }
                     
                     foreach ($destinations as $destination) {
-                        if (data_get($options, 'afterResponse', false)) {
-                            app()->terminating(function () use ($model, $qualifiedEventName, $options, $destination) {
+                        $dispatch = function () use ($model, $qualifiedEventName, $options, $destination) {
+                            try {
                                 EloquentEventEmitter::dispatch($model, $qualifiedEventName, $options)->onConnection($destination);
-                            });
+                            } catch (Exception $exception) {
+                                logger()->error("Unable to Emit Event", [
+                                    'event' => '$qualifiedEventName',
+                                    'model' => get_class($model),
+                                    'destination' => $destination,
+                                    'exception' => $exception,
+                                ]);
+                            }
+                        };
+                        
+                        if (data_get($options, 'afterResponse', false)) {
+                            app()->terminating($dispatch);
                         } else {
-                            EloquentEventEmitter::dispatch($model, $qualifiedEventName, $options)->onConnection($destination);
+                            $dispatch();
                         }
                     }
                 });
@@ -64,7 +76,15 @@ class EventSubscriber
                 }
 
                 foreach ($destinations as $destination) {
-                    LaravelEventEmitter::dispatch($event)->onConnection($destination);
+                    try {
+                        LaravelEventEmitter::dispatch($event)->onConnection($destination);
+                    } catch (Exception $exception) {
+                        logger()->error("Unable to Emit Event", [
+                            'event' => get_class($event),
+                            'destination' => $destination,
+                            'exception' => $exception,
+                        ]);
+                    }
                 }
             });
         }
