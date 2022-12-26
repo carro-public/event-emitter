@@ -38,6 +38,8 @@ class EloquentEventEmitter implements ShouldQueue
     {
         $this->model = $model;
         $this->event = $event;
+        # Preserve authenticated user who triggered the event
+        $this->authUser = auth()->user();
 
         # Set Job custom option
         foreach ($options as $option => $value) {

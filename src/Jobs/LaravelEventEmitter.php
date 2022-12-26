@@ -17,6 +17,8 @@ class LaravelEventEmitter implements ShouldQueue
     public function __construct($event)
     {
         $this->event = $event;
+        # Preserve authenticated user who triggered the event
+        $this->authUser = auth()->user();
     }
     
     public function handle()
