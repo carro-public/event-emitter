@@ -2,6 +2,7 @@
 
 namespace CarroPublic\EventEmitter\Middlewares;
 
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Notifications\SendQueuedNotifications;
 use CarroPublic\EventEmitter\Jobs\Concerns\WasAuthenticated;
 
@@ -13,7 +14,7 @@ class WasAuthenticateMiddleware
         $authUser = $this->getAuthUser($command);
 
         // Try to login as last authenticated user when the job was dispatched
-        if (! empty($authUser)) {
+        if (! empty($authUser) && $authUser instanceof Authenticatable) {
             auth()->login($authUser);
         }
 
