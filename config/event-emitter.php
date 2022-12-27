@@ -6,6 +6,11 @@ return [
      * If false, the EventSubscriber will be disabled
      */
     'enable' => env('EVENT_EMITTER_ENABLE', true),
+
+    /**
+     * Whether to allow preserving authenticated user when emitting the event
+     */
+    'auth' => env('EVENT_EMITTER_AUTHENTICATION', false),
     
     /**
      * Whether to print out the event emitter logs

@@ -13,6 +13,9 @@ trait HasEmitterConcern
     public function log($message, $context)
     {
         if (config('event-emitter.logging', false)) {
+            $context = array_merge($context, [
+                'authUser' => data_get($this->getAuthUser(), 'id'),
+            ]);
             logger()->info("[Event Emitter] {$message}", $context);
         }
     }

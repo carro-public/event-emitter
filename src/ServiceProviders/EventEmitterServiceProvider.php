@@ -2,6 +2,8 @@
 
 namespace CarroPublic\EventEmitter\ServiceProviders;
 
+use Illuminate\Support\Facades\Auth;
+use CarroPublic\EventEmitter\Guards\KernelGuard;
 use CarroPublic\EventEmitter\Subscribers\JobsSubscriber;
 use CarroPublic\EventEmitter\Subscribers\EventSubscriber;
 
@@ -21,6 +23,22 @@ class EventEmitterServiceProvider extends \Illuminate\Foundation\Support\Provide
         $this->mergeConfigFrom(__DIR__.'/../../config/event-emitter.php', 'event-emitter');
         
         $this->registerQueueConfig();
+
+        if ($this->app->runningInConsole()) {
+            # Register new Auth Guard for Kernel Application
+            Auth::extend('kernel', function () {
+                return new KernelGuard();
+            });
+
+            # Add new kernel guard to support console job authenticated
+            config(['auth.guards.kernel' => [
+                'driver' => 'kernel',
+                'provider' => 'users'
+            ]]);
+
+            # Set kernel guard as default guard when using auth()->user()
+            config(['auth.defaults.guard' => 'kernel']);
+        }
     }
 
     /**

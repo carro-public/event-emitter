@@ -6,11 +6,12 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use CarroPublic\EventEmitter\Jobs\Concerns\WasAuthenticated;
 use CarroPublic\EventEmitter\Jobs\Concerns\HasEmitterConcern;
 
 class EloquentEventEmitter implements ShouldQueue
 {
-    use Dispatchable, Queueable, HasEmitterConcern;
+    use Dispatchable, Queueable, HasEmitterConcern, WasAuthenticated;
 
     /**
      * @var Model
@@ -38,8 +39,11 @@ class EloquentEventEmitter implements ShouldQueue
     {
         $this->model = $model;
         $this->event = $event;
-        # Preserve authenticated user who triggered the event
-        $this->authUser = auth()->user();
+
+        # Preserve authenticated user who triggered the event if needed
+        if (config('event-emitter.auth')) {
+            $this->authUser = auth()->user();
+        }
 
         # Set Job custom option
         foreach ($options as $option => $value) {
