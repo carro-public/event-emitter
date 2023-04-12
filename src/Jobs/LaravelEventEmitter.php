@@ -49,7 +49,7 @@ class LaravelEventEmitter implements ShouldQueue
     private function transformObject()
     {
         if ($this->event instanceof \__PHP_Incomplete_Class) {
-            return $this->convertInstanceTo($this->event);
+            return $this->convertInstance($this->event, config('event-emitter.transformers', []));
         }
         
         return $this->event;

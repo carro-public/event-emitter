@@ -2,6 +2,7 @@
 
 namespace CarroPublic\EventEmitter\Jobs;
 
+use Illuminate\Support\Arr;
 use Illuminate\Bus\Queueable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -89,11 +90,9 @@ class EloquentEventEmitter implements ShouldQueue
 
             # Convert event name from Source Class to Destination Class
             $this->event = str_replace($this->getOriginalClassFromEvent(), $className, $this->event);
-
-            return $this->convertInstanceTo($this->model, $className);
         }
 
-        return $this->model;
+        return $this->convertInstance($this->model, config('event-emitter.transformers', []));
     }
 
     private function getOriginalClassFromEvent()
