@@ -49,7 +49,7 @@ class EventSubscriber
                                 EloquentEventEmitter::dispatch($model, $qualifiedEventName, $options)->onConnection($destination);
                             } catch (Exception $exception) {
                                 logger()->error("Unable to Emit Event", [
-                                    'event' => '$qualifiedEventName',
+                                    'event' => "$qualifiedEventName",
                                     'model' => get_class($model),
                                     'destination' => $destination,
                                     'exception' => $exception,

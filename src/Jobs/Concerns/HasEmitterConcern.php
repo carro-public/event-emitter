@@ -21,30 +21,22 @@ trait HasEmitterConcern
     }
 
     /**
+     * Deep convert class names from event-emitter transformers
      * @param $instance
-     * @param $targetClass
+     * @param $mapping
      * @return mixed
      */
-    public function convertInstanceTo($instance, $targetClass = null)
+    public function convertInstance($instance, $mapping)
     {
         $serializedString = serialize($instance);
 
-        if (is_null($targetClass) && preg_match('/O:\d+:"([^\"]*)"/', $serializedString, $matches)) {
-            $originalClass = $matches[1];
-
-            $targetClass = data_get(config('event-emitter.transformers'), $originalClass);
-            
-            if (empty($targetClass)) {
-                throw new \InvalidArgumentException("Class {$originalClass} Not Found. Should Use Transformation");
-            }
+        foreach ($mapping as $old => $new) {
+            # Generate new class marker on serialized string
+            $oldClassMarker = sprintf('O:%d:"%s"', strlen($old), $old);
+            $newClassMarker = sprintf('O:%d:"%s"', strlen($new), $new);
+            $serializedString = str_replace($oldClassMarker, $newClassMarker, $serializedString);
         }
-        
-        # Unserialize the object again with replaced className
-        return unserialize(sprintf(
-            'O:%d:"%s"%s',
-            strlen($targetClass),
-            $targetClass,
-            strstr(strstr($serializedString, '"'), ':')
-        ));
+
+        return unserialize($serializedString);
     }
 }
