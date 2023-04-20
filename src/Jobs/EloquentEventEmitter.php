@@ -60,7 +60,7 @@ class EloquentEventEmitter implements ShouldQueue
     {
         $this->model = $this->transformObject();
 
-        if ($this->model instanceof \__PHP_Incomplete_Class) {
+        if (empty($this->model) || $this->model instanceof \__PHP_Incomplete_Class) {
             $this->log("Failed To Transform Model", [
                 'model' => $this->getOriginalClassFromEvent(),
             ]);
@@ -73,7 +73,7 @@ class EloquentEventEmitter implements ShouldQueue
             $this->model = $this->model->fresh();
         }
 
-        if (!$this->model) {
+        if (empty($this->model)) {
             $this->log("Received Invalid Eloquent Event", [
                 'model' => json_encode($this->model, JSON_PRETTY_PRINT),
             ]);
@@ -95,16 +95,57 @@ class EloquentEventEmitter implements ShouldQueue
      */
     private function transformObject()
     {
-        if ($this->model instanceof \__PHP_Incomplete_Class) {
-            $className = data_get(config('event-emitter.transformers', []), $this->getOriginalClassFromEvent());
-
-            if ($className) {
-                # Convert event name from Source Class to Destination Class
-                $this->event = str_replace($this->getOriginalClassFromEvent(), $className, $this->event);
-            }
+        if (!$this->model instanceof \__PHP_Incomplete_Class) {
+            return $this->convertInstance($this->model, config('event-emitter.transformers', []));
         }
 
+        $obj = $this->transformObjectByDirectMatch();
+
+        if (!empty($obj) && !($obj instanceof \__PHP_Incomplete_Class)) {
+            return;
+        }
+
+        return $this->transformerObjectByClosure();
+    }
+
+    /**
+     * @return mixed|void
+     */
+    private function transformObjectByDirectMatch()
+    {
+        $className = data_get(config('event-emitter.transformers', []), $this->getOriginalClassFromEvent());
+
+        if (empty($className) || !is_string($className)) {
+            return $this->model;
+        }
+
+        # Convert event name from Source Class to Destination Class
+        $this->event = str_replace($this->getOriginalClassFromEvent(), $className, $this->event);
+
         return $this->convertInstance($this->model, config('event-emitter.transformers', []));
+    }
+
+    protected function transformerObjectByClosure() {
+        $orgClass = $this->getOriginalClassFromEvent();
+
+        $transformers = config('event-emitter.transformers', []);
+        foreach($transformers as $index => $arr) {
+            if (!is_array($arr) || !isset($arr['type']) || $arr['type'] != 'closure') {
+                continue;
+            }
+
+            $obj = $arr['closure']($orgClass, $this->model);
+
+            if (empty($obj) || ($obj instanceof \__PHP_Incomplete_Class)) {
+                continue;
+            }
+
+            $this->event = str_replace($this->getOriginalClassFromEvent(), get_class($obj), $this->event);
+
+            return $obj;
+        }
+
+        return $this->model;
     }
 
     private function getOriginalClassFromEvent()

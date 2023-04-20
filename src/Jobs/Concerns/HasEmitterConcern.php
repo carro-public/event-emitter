@@ -31,6 +31,9 @@ trait HasEmitterConcern
         $serializedString = serialize($instance);
 
         foreach ($mapping as $old => $new) {
+            if (!is_string($new)) {
+                continue;
+            }
             # Generate new class marker on serialized string
             $oldClassMarker = sprintf('O:%d:"%s"', strlen($old), $old);
             $newClassMarker = sprintf('O:%d:"%s"', strlen($new), $new);
