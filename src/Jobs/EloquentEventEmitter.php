@@ -59,25 +59,35 @@ class EloquentEventEmitter implements ShouldQueue
     public function handle()
     {
         $this->model = $this->transformObject();
+
+        if ($this->model instanceof \__PHP_Incomplete_Class) {
+            $this->log("Failed To Transform Model", [
+                'model' => $this->getOriginalClassFromEvent(),
+            ]);
+
+            return;
+        }
         
         # If the Eloquent should be refreshed before emitting
         if ($this->fresh) {
             $this->model = $this->model->fresh();
         }
 
-        /** @var Model $model */
-        if ($this->model) {
-            event($this->event, $this->model);
-            $this->log("Received Eloquent Event", [
-                'id' => $this->model->id,
-                'class' => get_class($this->model),
-                'event' => $this->event,
-            ]);
-        } else {
+        if (!$this->model) {
             $this->log("Received Invalid Eloquent Event", [
                 'model' => json_encode($this->model, JSON_PRETTY_PRINT),
             ]);
+
+            return;
         }
+
+        event($this->event, $this->model);
+
+        $this->log("Received Eloquent Event", [
+            'id' => $this->model->id,
+            'class' => $this->model->getMorphClass(),
+            'event' => $this->event,
+        ]);
     }
 
     /**
@@ -88,8 +98,10 @@ class EloquentEventEmitter implements ShouldQueue
         if ($this->model instanceof \__PHP_Incomplete_Class) {
             $className = data_get(config('event-emitter.transformers', []), $this->getOriginalClassFromEvent());
 
-            # Convert event name from Source Class to Destination Class
-            $this->event = str_replace($this->getOriginalClassFromEvent(), $className, $this->event);
+            if ($className) {
+                # Convert event name from Source Class to Destination Class
+                $this->event = str_replace($this->getOriginalClassFromEvent(), $className, $this->event);
+            }
         }
 
         return $this->convertInstance($this->model, config('event-emitter.transformers', []));
