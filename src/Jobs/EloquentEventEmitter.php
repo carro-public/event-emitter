@@ -91,40 +91,47 @@ class EloquentEventEmitter implements ShouldQueue
     }
 
     /**
-     * @return mixed|void
+     * Transofrm the model if the model is or include PHP_Incomplete_Class
+     *
+     * @return mixed
      */
     private function transformObject()
     {
-        if (!$this->model instanceof \__PHP_Incomplete_Class) {
+        if (!($this->model instanceof \__PHP_Incomplete_Class)) {
             return $this->convertInstance($this->model, config('event-emitter.transformers', []));
         }
 
         $obj = $this->transformObjectByDirectMatch();
 
         if (!empty($obj) && !($obj instanceof \__PHP_Incomplete_Class)) {
-            return;
+            return $obj;
         }
 
         return $this->transformerObjectByClosure();
     }
 
     /**
-     * @return mixed|void
+     * Transofrm the model by matching class to class
+     *
+     * @return mixed
      */
     private function transformObjectByDirectMatch()
     {
         $className = data_get(config('event-emitter.transformers', []), $this->getOriginalClassFromEvent());
 
-        if (empty($className) || !is_string($className)) {
-            return $this->model;
+        if ($className) {
+            # Convert event name from Source Class to Destination Class
+            $this->event = str_replace($this->getOriginalClassFromEvent(), $className, $this->event);
         }
-
-        # Convert event name from Source Class to Destination Class
-        $this->event = str_replace($this->getOriginalClassFromEvent(), $className, $this->event);
 
         return $this->convertInstance($this->model, config('event-emitter.transformers', []));
     }
 
+    /**
+     * Transofrm the model by invoking closure from the transformer config
+     *
+     * @return mixed
+     */
     protected function transformerObjectByClosure() {
         $orgClass = $this->getOriginalClassFromEvent();
 
