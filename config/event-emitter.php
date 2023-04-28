@@ -2,6 +2,11 @@
 
 return [
     /**
+     * Event emitter source name to be used when logging
+     */
+    'source' => env('EVENT_EMITTER_SOURCE', env('APP_NAME', 'undefined')),
+
+    /**
      * Whether we should enable the event-emitter
      * If false, the EventSubscriber will be disabled
      */

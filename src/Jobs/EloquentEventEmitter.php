@@ -38,6 +38,7 @@ class EloquentEventEmitter implements ShouldQueue
      */
     public function __construct($model, $event, $options = [])
     {
+        $this->loadSource();
         $this->model = $model;
         $this->event = $event;
 
