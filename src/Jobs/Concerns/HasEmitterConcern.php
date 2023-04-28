@@ -4,6 +4,27 @@ namespace CarroPublic\EventEmitter\Jobs\Concerns;
 
 trait HasEmitterConcern
 {
+    /** @var Emitter source */
+    protected $source;
+
+    /**
+     * Get event emitter source
+     * @return string|null
+     */
+    public function getSource()
+    {
+        return $this->source;
+    }
+
+    /**
+     * Load emitter source from config
+     * @return string|null
+     */
+    public function loadSource()
+    {
+        $this->source = config('event-emitter.source');
+    }
+
     /**
      * Print log message
      * @param $message
@@ -13,10 +34,11 @@ trait HasEmitterConcern
     public function log($message, $context)
     {
         if (config('event-emitter.logging', false)) {
+            $source = $this->getSource() ?? 'undefined';
             $context = array_merge($context, [
                 'authUser' => data_get($this->getAuthUser(), 'id'),
             ]);
-            logger()->info("[Event Emitter] {$message}", $context);
+            logger()->info("[Event Emitter] Source $source {$message}", $context);
         }
     }
 
