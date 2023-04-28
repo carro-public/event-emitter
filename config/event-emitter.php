@@ -4,7 +4,7 @@ return [
     /**
      * Event emitter source name to be used when logging
      */
-    'source' => env('EVENT_EMITTER_ENABLE', env('APP_NAME', 'undefined')),
+    'source' => env('EVENT_EMITTER_SOURCE', env('APP_NAME', 'undefined')),
 
     /**
      * Whether we should enable the event-emitter
