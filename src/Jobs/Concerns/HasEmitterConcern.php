@@ -37,8 +37,9 @@ trait HasEmitterConcern
             $source = $this->getSource() ?? 'undefined';
             $context = array_merge($context, [
                 'authUser' => data_get($this->getAuthUser(), 'id'),
+                'source' => $source,
             ]);
-            logger()->info("[Event Emitter] Source $source {$message}", $context);
+            logger()->info("[Event Emitter] {$message}", $context);
         }
     }
 
