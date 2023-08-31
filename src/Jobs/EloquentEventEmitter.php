@@ -2,7 +2,6 @@
 
 namespace CarroPublic\EventEmitter\Jobs;
 
-use Illuminate\Support\Arr;
 use Illuminate\Bus\Queueable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -18,6 +17,8 @@ class EloquentEventEmitter implements ShouldQueue
      * @var Model
      */
     protected $model;
+    
+    protected $serializedModel;
 
     /**
      * The Qualified Eloquent Event
@@ -45,6 +46,13 @@ class EloquentEventEmitter implements ShouldQueue
         # Preserve authenticated user who triggered the event if needed
         if (config('event-emitter.auth')) {
             $this->authUser = auth()->user();
+        }
+        
+        if (config('event-emitter.serialize_model')) {
+            $this->serializedModel = [
+                "class" => get_class($this->model),
+                "id" => $this->model->getKey(),
+            ];
         }
 
         # Set Job custom option
@@ -98,6 +106,13 @@ class EloquentEventEmitter implements ShouldQueue
      */
     private function transformObject()
     {
+        if (!is_null($this->serializedModel)) {
+            /** @var Model $modelClass */
+            $modelClass = $this->serializedModel['class'];
+            $modelId = $this->serializedModel['id'];
+            return $modelClass::query()->firstOrFail($modelId);
+        }
+        
         if (!($this->model instanceof \__PHP_Incomplete_Class)) {
             return $this->convertInstance($this->model, config('event-emitter.transformers', []));
         }
