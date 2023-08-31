@@ -53,6 +53,8 @@ class EloquentEventEmitter implements ShouldQueue
                 "class" => get_class($this->model),
                 "id" => $this->model->getKey(),
             ];
+            
+            $this->model = null;
         }
 
         # Set Job custom option
