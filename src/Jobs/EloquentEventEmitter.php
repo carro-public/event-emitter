@@ -98,6 +98,10 @@ class EloquentEventEmitter implements ShouldQueue
      */
     private function transformObject()
     {
+        if ($this->authUser && $this->authUser instanceof \__PHP_Incomplete_Class) {
+            $this->authUser = $this->convertInstance($this->authUser, config('event-emitter.transformers', []));
+        }
+        
         if (!($this->model instanceof \__PHP_Incomplete_Class)) {
             return $this->convertInstance($this->model, config('event-emitter.transformers', []));
         }
