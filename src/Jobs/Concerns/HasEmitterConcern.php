@@ -2,6 +2,8 @@
 
 namespace CarroPublic\EventEmitter\Jobs\Concerns;
 
+use ReflectionClass;
+
 trait HasEmitterConcern
 {
     /** @var Emitter source */
@@ -64,5 +66,42 @@ trait HasEmitterConcern
         }
 
         return unserialize($serializedString);
+    }
+
+    /**
+     * Restore the model after serialization.
+     *
+     * @param  array  $values
+     * @return void
+     */
+    public function __unserialize(array $values)
+    {
+        $properties = (new ReflectionClass($this))->getProperties();
+
+        $class = get_class($this);
+
+        foreach ($properties as $property) {
+            if ($property->isStatic()) {
+                continue;
+            }
+
+            $name = $property->getName();
+
+            if ($property->isPrivate()) {
+                $name = "\0{$class}\0{$name}";
+            } elseif ($property->isProtected()) {
+                $name = "\0*\0{$name}";
+            }
+
+            if (! array_key_exists($name, $values)) {
+                continue;
+            }
+
+            $property->setAccessible(true);
+
+            $property->setValue(
+                $this, $this->convertInstance($values[$name], config('event-emitter.transformers', [])),
+            );
+        }
     }
 }
