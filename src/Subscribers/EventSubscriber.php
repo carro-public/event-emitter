@@ -82,7 +82,7 @@ class EventSubscriber
                     } catch (Exception $exception) {
                         logger()->error("Unable to Emit Event", [
                             'event' => get_class($event),
-                            'data' => is_array($event) ? $event : $event->toArray(),
+                            'data' => (array) $event,
                             'destination' => $destination,
                             'exception' => $exception,
                         ]);
