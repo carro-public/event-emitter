@@ -65,6 +65,11 @@ trait HasEmitterConcern
             $serializedString = str_replace($oldClassMarker, $newClassMarker, $serializedString);
         }
 
+        # Making protected $dates become public $dates to be able to access from outside
+        $serializedString = str_replace(
+            "s:8:\"\0*\0dates", 's:5:"dates', $serializedString
+        );
+
         return unserialize($serializedString);
     }
 
