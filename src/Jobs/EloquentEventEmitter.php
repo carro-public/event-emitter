@@ -74,7 +74,7 @@ class EloquentEventEmitter implements ShouldQueue
 
             return;
         }
-        
+
         # If the Eloquent should be refreshed before emitting
         if ($this->fresh) {
             $this->model = $this->model->fresh();
@@ -86,6 +86,13 @@ class EloquentEventEmitter implements ShouldQueue
             ]);
 
             return;
+        }
+
+        if (!empty($dates = $this->model->dates)) {
+            $this->model->mergeCasts(array_reduce($dates, function ($casts, $date) {
+                $casts[$date] = 'datetime';
+                return $casts;
+            }));
         }
 
         event($this->event, $this->model);
