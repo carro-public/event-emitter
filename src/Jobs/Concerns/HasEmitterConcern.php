@@ -9,6 +9,8 @@ trait HasEmitterConcern
     /** @var Emitter source */
     protected $source;
 
+    protected $originUrlData;
+
     /**
      * Get event emitter source
      * @return string|null
@@ -19,12 +21,25 @@ trait HasEmitterConcern
     }
 
     /**
+     * Get event emitter originUrlData
+     * @return array|null
+     */
+    public function getOriginUrlData()
+    {
+        return $this->originUrlData;
+    }
+
+    /**
      * Load emitter source from config
      * @return string|null
      */
     public function loadSource()
     {
         $this->source = config('event-emitter.source');
+        $this->originUrlData = [
+            "url" => request()?->fullUrl(),
+            "method" => request()?->method(),
+        ];
     }
 
     /**
