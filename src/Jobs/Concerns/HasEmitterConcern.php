@@ -26,7 +26,7 @@ trait HasEmitterConcern
      */
     public function getOriginUrlData()
     {
-        return $this->source;
+        return $this->originUrlData;
     }
 
     /**
