@@ -36,9 +36,15 @@ trait HasEmitterConcern
     public function loadSource()
     {
         $this->source = config('event-emitter.source');
+        $url = request()?->fullUrl();
+        $method = request()?->method();
+        if (!empty(config('audit.running_job.name'))) {
+            $url = config('audit.running_job.name');
+            $method = "job";
+        }
         $this->originUrlData = [
-            "url" => request()?->fullUrl(),
-            "method" => request()?->method(),
+            "url" => $url,
+            "method" => $method,
         ];
     }
 
