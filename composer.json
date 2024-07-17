@@ -2,7 +2,8 @@
     "name": "carropublic/event-emitter",
     "require": {
         "php": ">=7.1.0",
-        "laravel/framework": ">=5.5"
+        "laravel/framework": ">=5.5",
+        "owen-it/laravel-auditing": "^13.5"
     },
     "autoload": {
         "psr-4": {
