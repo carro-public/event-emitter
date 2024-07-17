@@ -3,9 +3,11 @@
 namespace CarroPublic\EventEmitter\ServiceProviders;
 
 use Illuminate\Support\Facades\Auth;
+use OwenIt\Auditing\Contracts\Auditor;
 use CarroPublic\EventEmitter\Guards\KernelGuard;
 use CarroPublic\EventEmitter\Subscribers\JobsSubscriber;
 use CarroPublic\EventEmitter\Subscribers\EventSubscriber;
+use CarroPublic\EventEmitter\Auditing\Auditor as EventEmitterAuditor;
 
 class EventEmitterServiceProvider extends \Illuminate\Foundation\Support\Providers\EventServiceProvider
 {
@@ -13,7 +15,7 @@ class EventEmitterServiceProvider extends \Illuminate\Foundation\Support\Provide
         JobsSubscriber::class,
         EventSubscriber::class,
     ];
-    
+
     public function boot()
     {
         $this->publishes([
@@ -39,6 +41,15 @@ class EventEmitterServiceProvider extends \Illuminate\Foundation\Support\Provide
             # Set kernel guard as default guard when using auth()->user()
             config(['auth.defaults.guard' => 'kernel']);
         }
+
+        $this->registerAuditor();
+    }
+
+    protected function registerAuditor()
+    {
+        $this->app->singleton(Auditor::class, function ($app) {
+            return new EventEmitterAuditor($app);
+        });
     }
 
     /**
