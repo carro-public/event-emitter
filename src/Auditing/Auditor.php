@@ -13,7 +13,7 @@ class Auditor extends BaseAuditor
      */
     public function execute(Auditable $model): void
     {
-        if ($model->getIsEmittedModel()) {
+        if (method_exists($model, 'getIsEmittedModel') && $model->getIsEmittedModel()) {
             return;
         }
 
