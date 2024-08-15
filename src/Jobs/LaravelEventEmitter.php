@@ -32,8 +32,12 @@ class LaravelEventEmitter implements ShouldQueue
         
         /** @var Model $model */
         if ($this->event) {
-            event($this->event);
             $this->log("Received Laravel Event", [
+                'class' => get_class($this->event),
+                'event' => $this->event,
+            ]);
+            event($this->event);
+            $this->log("Emitted Laravel Event", [
                 'class' => get_class($this->event),
                 'event' => $this->event,
             ]);
