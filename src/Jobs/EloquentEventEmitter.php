@@ -98,10 +98,16 @@ class EloquentEventEmitter implements ShouldQueue
         if (method_exists($this->model, 'setIsEmittedModel')) {
             $this->model->setIsEmittedModel();
         }
+        
+        $this->log("Received Eloquent Event", [
+            'id' => $this->model->id,
+            'class' => $this->model->getMorphClass(),
+            'event' => $this->event,
+        ]);
 
         event($this->event, $this->model);
 
-        $this->log("Received Eloquent Event", [
+        $this->log("Emitted Eloquent Event", [
             'id' => $this->model->id,
             'class' => $this->model->getMorphClass(),
             'event' => $this->event,
