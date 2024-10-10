@@ -3,6 +3,8 @@ namespace CarroPublic\EventEmitter\Traits;
 
 trait EmitterModelTrait
 {
+    protected $isEmittedModel = false;
+    
     /**
      * Settter of isEmittedModel attribute to indicate a model as emitted model
      *
