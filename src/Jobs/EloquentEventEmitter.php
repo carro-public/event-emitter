@@ -44,13 +44,7 @@ class EloquentEventEmitter implements ShouldQueue
 
         # Preserve authenticated user who triggered the event if needed
         if (config('event-emitter.auth')) {
-            $emittableAuthClasses = config('event-emitter.emittable_auth_classes') ?? [];
-
-            $authUser = auth()->user();
-
-            if (in_array(get_class($authUser), $emittableAuthClasses)) {
-                $this->authUser = auth()->user();
-            }
+            $this->authUser = auth()->user();
         }
 
         # Set Job custom option
