@@ -59,7 +59,7 @@ class EventSubscriber
                         };
                         
                         if (data_get($options, 'afterResponse', false)) {
-                            $events->listen('Illuminate\Foundation\Http\Events\RequestHandle', $dispatch);
+                            $events->listen('Illuminate\Foundation\Http\Events\RequestHandled', $dispatch);
                         } else {
                             $dispatch();
                         }
