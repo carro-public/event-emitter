@@ -26,7 +26,7 @@ class EventSubscriber
         foreach (config('event-emitter.eloquents', []) as $eloquent => $eloquentEvents) {
             foreach ($eloquentEvents as $event => $config) {
                 $qualifiedEventName = "eloquent.{$event}: {$eloquent}";
-                $events->listen($qualifiedEventName, function ($model) use ($qualifiedEventName, $config) {
+                $events->listen($qualifiedEventName, function ($model) use ($qualifiedEventName, $config, $events) {
                     # If we should not handle the listener, return immediately
                     # This flag will be turned on to prevent echoing
                     if (static::$shouldSkipHandling) {
@@ -59,7 +59,7 @@ class EventSubscriber
                         };
                         
                         if (data_get($options, 'afterResponse', false)) {
-                            app()->terminating($dispatch);
+                            $events->listen('Illuminate\Foundation\Http\Events\RequestHandle', $dispatch);
                         } else {
                             $dispatch();
                         }
