@@ -5,11 +5,12 @@ namespace CarroPublic\EventEmitter\Subscribers;
 use Exception;
 use CarroPublic\EventEmitter\Jobs\LaravelEventEmitter;
 use CarroPublic\EventEmitter\Jobs\EloquentEventEmitter;
+use CarroPublic\EventEmitter\Jobs\Concerns\WasAuthenticated;
 use CarroPublic\EventEmitter\Jobs\Concerns\HasEmitterConcern;
 
 class EventSubscriber
 {
-    use HasEmitterConcern;
+    use HasEmitterConcern, WasAuthenticated;
     
     static bool $shouldSkipHandling = false;
     
