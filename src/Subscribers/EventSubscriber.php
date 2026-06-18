@@ -5,9 +5,12 @@ namespace CarroPublic\EventEmitter\Subscribers;
 use Exception;
 use CarroPublic\EventEmitter\Jobs\LaravelEventEmitter;
 use CarroPublic\EventEmitter\Jobs\EloquentEventEmitter;
+use CarroPublic\EventEmitter\Jobs\Concerns\HasEmitterConcern;
 
 class EventSubscriber
 {
+    use HasEmitterConcern;
+    
     static bool $shouldSkipHandling = false;
     
     /**
@@ -46,7 +49,19 @@ class EventSubscriber
                     foreach ($destinations as $destination) {
                         $dispatch = function () use ($model, $qualifiedEventName, $options, $destination) {
                             try {
+                                $this->log('Emitting event', [
+                                    'event' => $qualifiedEventName,
+                                    'destination' => $destination,
+                                    'options' => $options,
+                                    'model' => $model,
+                                ]);
                                 EloquentEventEmitter::dispatch($model, $qualifiedEventName, $options)->onConnection($destination);
+                                $this->log('Emitted event', [
+                                    'event' => $qualifiedEventName,
+                                    'destination' => $destination,
+                                    'options' => $options,
+                                    'model' => $model,
+                                ]);
                             } catch (Exception $exception) {
                                 logger()->error("Unable to Emit Event", [
                                     'event' => "$qualifiedEventName",
